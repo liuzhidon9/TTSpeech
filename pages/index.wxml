@@ -1,0 +1,42 @@
+<!--pages/index.wxml-->
+<view id="app">
+  <audio id="audio" src="{{src}}" bindplay="showRadio" bindended="hidenRadio"></audio>
+  <!-- <button class="getClipboardData" bindtap="getClipboardData"> 粘贴</button> -->
+  <view class="content">
+
+    <textarea class="value" value="{{text}}" bindinput="textInput" maxlength="-1" placeholder="请在此处输入内容"></textarea>
+
+    <view class="control-bar">
+
+      <view class="voice">
+        <view class="tips">
+         Voice：
+        </view>
+        <view class="manIcon" wx:for="{{soundGenerator}}" data-per="{{item.per}}" bindtap="changeVoice">
+          <image src="{{item.active}}" wx:if="{{selectVoice==item.per}}"></image>
+          <image src="{{item.src}}" wx:else></image>
+        </view>
+      </view>
+
+      <view class="radio">
+       <image wx:if="{{speech}}" src="../assets/img/Radio.gif"></image>
+      </view>
+
+      <view class="paste-delete">
+        <view class="paste" bindtap="getClipboardData">
+          <image src="../assets/img/paste.png"></image>
+        </view>
+        <view bindtap="deleteContent" class="delete">
+          <image src="../assets/img/delete.png"></image>
+        </view>
+      </view>
+    </view>
+
+  </view>
+  <view class="button" bindtap="playAudio">
+    <button size="">生成语音</button>
+
+
+  </view>
+
+</view>
