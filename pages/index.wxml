@@ -1,6 +1,6 @@
 <!--pages/index.wxml-->
 <view id="app">
-  <audio id="audio" src="{{src}}" bindplay="showRadio" bindended="hidenRadio"></audio>
+
   <!-- <button class="getClipboardData" bindtap="getClipboardData"> 粘贴</button> -->
   <view class="content">
 
@@ -12,8 +12,8 @@
         <view class="tips">
          Voice：
         </view>
-        <view class="manIcon" wx:for="{{soundGenerator}}" data-per="{{item.per}}" bindtap="changeVoice">
-          <image src="{{item.active}}" wx:if="{{selectVoice==item.per}}"></image>
+        <view class="manIcon" wx:for="{{soundGenerator}}" wx:key="index" data-voiceType="{{item.voiceType}}" bindtap="changeVoice">
+          <image src="{{item.active}}" wx:if="{{voiceType==item.voiceType}}"></image>
           <image src="{{item.src}}" wx:else></image>
         </view>
       </view>

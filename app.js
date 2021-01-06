@@ -1,4 +1,8 @@
 //app.js
+// 腾讯云智能语音插件
+let QCloudAIVoice = requirePlugin("QCloudAIVoice");
+//设置腾讯云账号信息，其中appid是数字，secret是字符串，
+QCloudAIVoice.setQCloudSecret(1259622685, "AKID3qXx6zCvxjaFevwMSHp66pHSL2T3lPDk", "cyNagX7PTq9MM5fz1WmmfpjNvPmtjIbe", true);
 App({
   onLaunch: function () {
     // 展示本地存储能力
@@ -35,5 +39,8 @@ App({
   },
   globalData: {
     userInfo: null
+  },
+  plugin: {
+    QCloudAIVoice: QCloudAIVoice
   }
 })

@@ -1,4 +1,6 @@
 // pages/index.js
+
+const plugin = getApp().plugin
 Page({
 
   /**
@@ -6,43 +8,84 @@ Page({
    */
   data: {
     text: null,
-    src: null,
+    textArr: [],
     selectVoice: 111,
     speech: false,
-    per: 111,
-    token_id: null,
+    voiceType: 101015,
     soundGenerator: [{
-      per: 106,
-      name: "度博文",
-      src: "../assets/img/man.png",
-      active: "../assets/img/man-active.png"
-    },
-    {
-      per: 111,
-      name: "度小萌",
-      src: "../assets/img/woman.png",
-      active: "../assets/img/woman-active.png"
-    },
+        voiceType: 101013,
+        description: "智辉，新闻男生",
+        src: "../assets/img/man.png",
+        active: "../assets/img/man-active.png"
+      },
+      {
+        voiceType: 101007,
+        description: "智娜,客服女声",
+        src: "../assets/img/woman.png",
+        active: "../assets/img/woman-active.png"
+      },
     ]
+  },
+  generatorAduio: function () {
+    const innerAudioContext = wx.createInnerAudioContext();
+    console.log(this.data.textArr);
+    let textArr = this.data.textArr
+    let _this = this
+    plugin.QCloudAIVoice.textToSpeech({
+      content: textArr.shift(),
+      speed: 0,
+      volume: 0,
+      voiceType: this.data.voiceType,
+      language: 1,
+      projectId: 0,
+      sampleRate: 16000,
+
+      success: function (data) {
+        _this.setData({
+          textArr: textArr
+        })
+        // console.log("data", data);
+        let url = data.result.filePath;
+        if (url && url.length > 0) {
+      
+          innerAudioContext.src = url;
+          innerAudioContext.play()
+          innerAudioContext.onPlay(() => {console.log('开始播放');});
+          innerAudioContext.onError((res) => {
+            console.log(res.errMsg)
+          });
+          innerAudioContext.onEnded(() => {
+            innerAudioContext.destroy()
+            if (textArr.length > 0) {
+              _this.generatorAduio()
+              console.log('播放结束');
+            }
+          })
+        }
+      },
+      fail: function (error) {
+        console.log(error);
+      }
+    })
   },
 
   // 生成语音
   playAudio: function () {
-    var s = "http://tsn.baidu.com/text2audio?tex=" + this.data.text + "&tok=" + this.data.token_id + "&cuid=18488711&ctp=1&lan=zh&per=" + this.data.per
-    // console.log(s)
-    this.setData({
-      src: s
-    })
-    if (this.data.text != null && this.data.text != "") {
-      this.audioCtx.play()
-    } else {
+    if (this.data.text == null || this.data.text == "") {
       wx.showToast({
         title: '请输入内容 !',
         icon: 'none',
         duration: 1000
       })
-
+      return
     }
+
+    let textArr = this.data.text.split(/[,.:;?!，。：；！？ ]/igm)
+    this.setData({
+      textArr: textArr
+    })
+    this.generatorAduio()
+
 
   },
   textInput: function (res) {
@@ -59,7 +102,7 @@ Page({
       src: null,
       speech: false
     })
-    this.audioCtx.pause()
+    innerAudioContext.pause()
   },
 
   // 获取粘贴板内容
@@ -77,15 +120,16 @@ Page({
   },
   // 选择声音
   changeVoice: function (e) {
-    // console.log(e.currentTarget.dataset.per)
-    var id = e.currentTarget.dataset.per
+    console.log(e.currentTarget.dataset)
+    var voiceType = e.currentTarget.dataset.voicetype
     this.setData({
-      selectVoice: id,
-      per: id
+      voiceType: voiceType
     })
     wx.setStorage({
       key: 'personal',
-      data: JSON.stringify({ per: id }),
+      data: JSON.stringify({
+        voiceType: voiceType
+      }),
       success(res) {
         // console.log(res)
       }
@@ -105,26 +149,12 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    // 获取token
-    wx.request({
-      url: 'https://openapi.baidu.com/oauth/2.0/token?grant_type=client_credentials&client_id=fKh1vAqVHaOjYcoowsonUSoL&client_secret=cO1WUymT6L93VNd0R4g0PZre3bfNSXL4',
-      success: (res) => {
-        this.setData({
-          token_id: res.data.access_token
-        })
-        // console.log(res.data.expires_in / 60 / 60 / 24, Date.now())
-      }
-    })
-
-    this.audioCtx = wx.createAudioContext('audio')
-    // console.log(this.audioCtx)
     wx.getStorage({
       key: 'personal',
       success: (res) => {
-        // console.log(JSON.parse(res.data).per)
+        // console.log(JSON.parse(res.data).selectVoice)
         this.setData({
-          selectVoice: JSON.parse(res.data).per,
-          per: JSON.parse(res.data).per
+          voiceType: JSON.parse(res.data).voiceType
         })
       },
     })
