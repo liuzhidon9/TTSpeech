@@ -9,6 +9,7 @@ Page({
   data: {
     text: null,
     textArr: [],
+    audioArr: [],
     selectVoice: 111,
     speech: false,
     voiceType: 101015,
@@ -26,13 +27,13 @@ Page({
       },
     ]
   },
-  generatorAduio: function () {
-    const innerAudioContext = wx.createInnerAudioContext();
-    console.log(this.data.textArr);
-    let textArr = this.data.textArr
-    let _this = this
+  generatorAduio: function (text, callback) {
+    // const innerAudioContext = wx.createInnerAudioContext();
+    // console.log(this.data.textArr);
+    // let textArr = this.data.textArr
+    // let _this = this
     plugin.QCloudAIVoice.textToSpeech({
-      content: textArr.shift(),
+      content: text,
       speed: 0,
       volume: 0,
       voiceType: this.data.voiceType,
@@ -41,27 +42,31 @@ Page({
       sampleRate: 16000,
 
       success: function (data) {
-        _this.setData({
-          textArr: textArr
-        })
+        callback(data)
+        // _this.setData({
+        //   textArr: textArr
+        // })
         // console.log("data", data);
-        let url = data.result.filePath;
-        if (url && url.length > 0) {
-      
-          innerAudioContext.src = url;
-          innerAudioContext.play()
-          innerAudioContext.onPlay(() => {console.log('开始播放');});
-          innerAudioContext.onError((res) => {
-            console.log(res.errMsg)
-          });
-          innerAudioContext.onEnded(() => {
-            innerAudioContext.destroy()
-            if (textArr.length > 0) {
-              _this.generatorAduio()
-              console.log('播放结束');
-            }
-          })
-        }
+        // let url = data.result.filePath;
+        // _this.setData({
+        //   audioArr:_this.data.audioArr.push(url)
+        // })
+        // if (url && url.length > 0) {
+
+        //   innerAudioContext.src = url;
+        //   innerAudioContext.play()
+        //   innerAudioContext.onPlay(() => {console.log('开始播放');});
+        //   innerAudioContext.onError((res) => {
+        //     console.log(res.errMsg)
+        //   });
+        //   innerAudioContext.onEnded(() => {
+        //     innerAudioContext.destroy()
+        //     if (textArr.length > 0) {
+        //       _this.generatorAduio()
+        //       console.log('播放结束');
+        //     }
+        //   })
+        // }
       },
       fail: function (error) {
         console.log(error);
@@ -80,12 +85,46 @@ Page({
       return
     }
 
-    let textArr = this.data.text.split(/[,.:;?!，。：；！？ ]/igm)
-    this.setData({
-      textArr: textArr
+    let textArr = this.data.text.match(/(.|\n){1,100}([,.:;?!，。：；！？]|\n)/igm)
+    console.log(textArr);
+    let audioArr = textArr.map((item) => {
+      return 0
     })
-    this.generatorAduio()
+    new Promise((resolve, reject) => {
+      textArr.forEach((text, index) => {
+        this.generatorAduio(text, (data) => {
+          // console.log(index,data);
+          audioArr.splice(index, 1, data.result.filePath)
 
+          if (audioArr.indexOf(0) == -1) {
+            resolve(audioArr)
+          }
+        })
+      })
+    }).then(res => {
+      console.log(res);
+      console.log('done');
+   
+      let play = () => {
+        const innerAudioContext = wx.createInnerAudioContext();
+        innerAudioContext.src = audioArr.shift();
+        innerAudioContext.play()
+        innerAudioContext.onPlay(() => {
+          console.log('开始播放');
+        });
+        innerAudioContext.onError((res) => {
+          console.log(res.errMsg)
+        });
+        innerAudioContext.onEnded(() => {
+          innerAudioContext.destroy()
+          if (audioArr.length > 0) {
+            play()
+            console.log('播放结束');
+          }
+        })
+      }
+      play()
+    })
 
   },
   textInput: function (res) {
