@@ -67,7 +67,7 @@ display: flex;
   opacity: 0.6;
 }
 
-.content .value {
+.content .content-text {
   width: 100%;
   height:60vw;
   box-sizing: border-box;

@@ -4,22 +4,18 @@
   <!-- <button class="getClipboardData" bindtap="getClipboardData"> 粘贴</button> -->
   <view class="content">
 
-    <textarea class="value" value="{{text}}" bindinput="textInput" maxlength="-1" placeholder="请在此处输入内容"></textarea>
-
+    <textarea class="content-text" value="{{text}}" bindinput="textInput" maxlength="-1"  placeholder="请在此处输入内容">
+    </textarea>
     <view class="control-bar">
-
       <view class="voice">
         <view class="tips">
-         Voice：
+          Voice：
         </view>
-        <view class="manIcon" wx:for="{{soundGenerator}}" wx:key="index" data-voiceType="{{item.voiceType}}" bindtap="changeVoice">
+        <view class="manIcon" wx:for="{{soundGenerator}}" wx:key="index" data-voiceType="{{item.voiceType}}"
+          bindtap="changeVoice">
           <image src="{{item.active}}" wx:if="{{voiceType==item.voiceType}}"></image>
           <image src="{{item.src}}" wx:else></image>
         </view>
-      </view>
-
-      <view class="radio">
-       <image wx:if="{{speech}}" src="../assets/img/Radio.gif"></image>
       </view>
 
       <view class="paste-delete">

@@ -2,17 +2,16 @@
 
 const plugin = getApp().plugin
 Page({
-
   /**
    * 页面的初始数据
    */
   data: {
-    text: null,
-    textArr: [],
+    text: "",
+    cacheText: "",
     audioArr: [],
-    selectVoice: 111,
     speech: false,
     voiceType: 101015,
+    innerAudioContext: null,
     soundGenerator: [{
         voiceType: 101013,
         description: "智辉，新闻男生",
@@ -27,55 +26,31 @@ Page({
       },
     ]
   },
-  generatorAduio: function (text, callback) {
-    // const innerAudioContext = wx.createInnerAudioContext();
-    // console.log(this.data.textArr);
-    // let textArr = this.data.textArr
-    // let _this = this
-    plugin.QCloudAIVoice.textToSpeech({
-      content: text,
-      speed: 0,
-      volume: 0,
-      voiceType: this.data.voiceType,
-      language: 1,
-      projectId: 0,
-      sampleRate: 16000,
 
-      success: function (data) {
-        callback(data)
-        // _this.setData({
-        //   textArr: textArr
-        // })
-        // console.log("data", data);
-        // let url = data.result.filePath;
-        // _this.setData({
-        //   audioArr:_this.data.audioArr.push(url)
-        // })
-        // if (url && url.length > 0) {
-
-        //   innerAudioContext.src = url;
-        //   innerAudioContext.play()
-        //   innerAudioContext.onPlay(() => {console.log('开始播放');});
-        //   innerAudioContext.onError((res) => {
-        //     console.log(res.errMsg)
-        //   });
-        //   innerAudioContext.onEnded(() => {
-        //     innerAudioContext.destroy()
-        //     if (textArr.length > 0) {
-        //       _this.generatorAduio()
-        //       console.log('播放结束');
-        //     }
-        //   })
-        // }
-      },
-      fail: function (error) {
-        console.log(error);
-      }
+  // 根据文本生成语音
+  generatorAduio: function (text) {
+    return new Promise((resolve, reject) => {
+      plugin.QCloudAIVoice.textToSpeech({
+        content: text,
+        speed: 0,
+        volume: 0,
+        voiceType: this.data.voiceType,
+        language: 1,
+        projectId: 0,
+        sampleRate: 16000,
+        success: function (data) {
+          resolve(data)
+        },
+        fail: function (error) {
+          reject(error);
+        }
+      })
     })
   },
 
-  // 生成语音
-  playAudio: function () {
+  // 播放语音
+  playAudio: async function () {
+    this.destroyAudio()
     if (this.data.text == null || this.data.text == "") {
       wx.showToast({
         title: '请输入内容 !',
@@ -84,48 +59,53 @@ Page({
       })
       return
     }
-
-    let textArr = this.data.text.match(/(.|\n){1,100}([,.:;?!，。：；！？]|\n)/igm)
+    //切割文本
+    let text = this.data.text + " "
+    let textArr = text.match(/.{1,100}([,.:;?!，。：；！？、]|\n|\r|\s)/igm)
     console.log(textArr);
     let audioArr = textArr.map((item) => {
       return 0
     })
-    new Promise((resolve, reject) => {
-      textArr.forEach((text, index) => {
-        this.generatorAduio(text, (data) => {
-          // console.log(index,data);
+    if (this.data.text != this.data.cacheText) {
+      await new Promise((resolve, reject) => {
+        textArr.forEach(async (text, index) => {
+          let data = await this.generatorAduio(text)
           audioArr.splice(index, 1, data.result.filePath)
-
           if (audioArr.indexOf(0) == -1) {
-            resolve(audioArr)
+            this.setData({
+              audioArr: audioArr.slice(),
+              cacheText: this.data.text
+            })
+            resolve()
           }
         })
       })
-    }).then(res => {
-      console.log(res);
-      console.log('done');
-   
-      let play = () => {
-        const innerAudioContext = wx.createInnerAudioContext();
-        innerAudioContext.src = audioArr.shift();
-        innerAudioContext.play()
-        innerAudioContext.onPlay(() => {
-          console.log('开始播放');
-        });
-        innerAudioContext.onError((res) => {
-          console.log(res.errMsg)
-        });
-        innerAudioContext.onEnded(() => {
-          innerAudioContext.destroy()
-          if (audioArr.length > 0) {
-            play()
-            console.log('播放结束');
-          }
-        })
-      }
-      play()
-    })
+    } else {
+      audioArr = this.data.audioArr.slice()
+    }
 
+    let play = () => {
+      const innerAudioContext = wx.createInnerAudioContext();
+      this.setData({
+        innerAudioContext: innerAudioContext
+      })
+      innerAudioContext.src = audioArr.shift();
+      innerAudioContext.play()
+      innerAudioContext.onPlay(() => {
+        console.log('开始播放');
+      });
+      innerAudioContext.onError((res) => {
+        console.log(res.errMsg)
+      });
+      innerAudioContext.onEnded(() => {
+        innerAudioContext.destroy()
+        if (audioArr.length > 0) {
+          play()
+          console.log('播放结束');
+        }
+      })
+    }
+    play()
   },
   textInput: function (res) {
     // console.log(res)
@@ -141,14 +121,18 @@ Page({
       src: null,
       speech: false
     })
-    innerAudioContext.pause()
+    this.destroyAudio()
+  },
+
+  destroyAudio: function () {
+    //移除声音播放
+    this.data.innerAudioContext == null ? '' : this.data.innerAudioContext.destroy()
   },
 
   // 获取粘贴板内容
   getClipboardData: function () {
     var _this = this
     wx.getClipboardData({
-
       success(res) {
         var newtext = _this.data.text + res.data
         _this.setData({
@@ -162,10 +146,11 @@ Page({
     console.log(e.currentTarget.dataset)
     var voiceType = e.currentTarget.dataset.voicetype
     this.setData({
-      voiceType: voiceType
+      voiceType: voiceType,
+      cacheText: ''
     })
     wx.setStorage({
-      key: 'personal',
+      key: 'voiceType',
       data: JSON.stringify({
         voiceType: voiceType
       }),
@@ -187,9 +172,10 @@ Page({
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad: function (options) {
+  onLoad: async function (options) {
+    
     wx.getStorage({
-      key: 'personal',
+      key: 'voiceType',
       success: (res) => {
         // console.log(JSON.parse(res.data).selectVoice)
         this.setData({
