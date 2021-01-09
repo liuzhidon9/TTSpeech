@@ -1,6 +1,22 @@
 // pages/index.js
-
 const plugin = getApp().plugin
+// 违规文字检测
+let msgSecCheck= (msg)=> {
+  wx.cloud.init()
+  return new Promise((resolve, reject) => {
+    wx.cloud.callFunction({
+      name: "msgSecCheck",
+      success: (res) => {
+        let result = res.result
+        resolve(result)
+      },
+      fail: (err) => {
+        console.log(err);
+      }
+    })
+  })
+
+}
 Page({
   /**
    * 页面的初始数据
@@ -11,6 +27,7 @@ Page({
     audioArr: [],
     speech: false,
     voiceType: 101015,
+    loading:false,
     innerAudioContext: null,
     soundGenerator: [{
         voiceType: 101013,
@@ -59,6 +76,17 @@ Page({
       })
       return
     }
+
+    let result = await msgSecCheck(this.data.text) //违规文本检查
+    if (result.errCode == 87014 || result.errMsg == "risky content") {
+      wx.showToast({
+        title: '内容含有违法违规内容!',
+        icon: 'none',
+        duration: 1500
+      })
+      return
+    }
+
     //切割文本
     let text = this.data.text + " "
     let textArr = text.match(/.{1,100}([,.:;?!，。：；！？、]|\n|\r|\s)/igm)
@@ -68,13 +96,17 @@ Page({
     })
     if (this.data.text != this.data.cacheText) {
       await new Promise((resolve, reject) => {
+        this.setData({
+          loading:true
+        })
         textArr.forEach(async (text, index) => {
           let data = await this.generatorAduio(text)
           audioArr.splice(index, 1, data.result.filePath)
           if (audioArr.indexOf(0) == -1) {
             this.setData({
               audioArr: audioArr.slice(),
-              cacheText: this.data.text
+              cacheText: this.data.text,
+              loading:false
             })
             resolve()
           }
@@ -93,6 +125,9 @@ Page({
       innerAudioContext.play()
       innerAudioContext.onPlay(() => {
         console.log('开始播放');
+        this.setData({
+          speech:true
+        })
       });
       innerAudioContext.onError((res) => {
         console.log(res.errMsg)
@@ -102,17 +137,16 @@ Page({
         if (audioArr.length > 0) {
           play()
           console.log('播放结束');
+          return
         }
+        this.setData({
+          speech:false
+        })
       })
     }
     play()
   },
-  textInput: function (res) {
-    // console.log(res)
-    this.setData({
-      text: res.detail.value
-    })
-  },
+
   // 删除内容
   deleteContent: function () {
     // console.log('删除')
@@ -129,14 +163,14 @@ Page({
     this.data.innerAudioContext == null ? '' : this.data.innerAudioContext.destroy()
   },
 
+  
   // 获取粘贴板内容
   getClipboardData: function () {
     var _this = this
     wx.getClipboardData({
       success(res) {
-        var newtext = _this.data.text + res.data
         _this.setData({
-          text: newtext
+          text: _this.data.text + res.data
         })
       }
     })
@@ -159,21 +193,12 @@ Page({
       }
     })
   },
-  showRadio: function () {
-    this.setData({
-      speech: true
-    })
-  },
-  hidenRadio: function () {
-    this.setData({
-      speech: false
-    })
-  },
+
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: async function (options) {
-    
+    //获取本地缓存声音类型
     wx.getStorage({
       key: 'voiceType',
       success: (res) => {

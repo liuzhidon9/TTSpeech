@@ -1,3 +1,5 @@
 {
-  "usingComponents": {}
+  "usingComponents": {
+    "rolling-loading":"../components/rolling-loading/"
+  }
 }

@@ -1,0 +1,2 @@
+<!--components/rolling-loading/index.wxml-->
+    <view class="rolling"></view>

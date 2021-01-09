@@ -1,15 +1,13 @@
 <!--pages/index.wxml-->
 <view id="app">
-
   <!-- <button class="getClipboardData" bindtap="getClipboardData"> 粘贴</button> -->
   <view class="content">
-
-    <textarea class="content-text" value="{{text}}" bindinput="textInput" maxlength="-1"  placeholder="请在此处输入内容">
+    <textarea class="content-text" model:value="{{text}}" bindinput="textInput" maxlength="-1" placeholder="请在此处输入内容">
     </textarea>
     <view class="control-bar">
       <view class="voice">
         <view class="tips">
-          Voice：
+          Voice:
         </view>
         <view class="manIcon" wx:for="{{soundGenerator}}" wx:key="index" data-voiceType="{{item.voiceType}}"
           bindtap="changeVoice">
@@ -17,7 +15,9 @@
           <image src="{{item.src}}" wx:else></image>
         </view>
       </view>
-
+      <view class="radio" wx:if="{{speech==true}}">
+        <image src="../assets/img/Radio.gif"></image>
+      </view>
       <view class="paste-delete">
         <view class="paste" bindtap="getClipboardData">
           <image src="../assets/img/paste.png"></image>
@@ -29,10 +29,11 @@
     </view>
 
   </view>
-  <view class="button" bindtap="playAudio">
-    <button size="">生成语音</button>
 
+  <button class="genrater-audio" size="" bindtap="playAudio">
+    <rolling-loading class="rolling-loading" wx:if="{{loading==true}}"></rolling-loading>
+    <text>生成语音</text>
+  </button>
 
-  </view>
 
 </view>
