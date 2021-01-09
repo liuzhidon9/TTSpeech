@@ -2,7 +2,7 @@
 <view id="app">
   <!-- <button class="getClipboardData" bindtap="getClipboardData"> 粘贴</button> -->
   <view class="content">
-    <textarea class="content-text" model:value="{{text}}" bindinput="textInput" maxlength="-1" placeholder="请在此处输入内容">
+    <textarea class="content-text" model:value="{{text}}" maxlength="-1" placeholder="请在此处输入内容">
     </textarea>
     <view class="control-bar">
       <view class="voice">

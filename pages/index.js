@@ -1,7 +1,7 @@
 // pages/index.js
 const plugin = getApp().plugin
 // 违规文字检测
-let msgSecCheck= (msg)=> {
+let msgSecCheck = (msg) => {
   wx.cloud.init()
   return new Promise((resolve, reject) => {
     wx.cloud.callFunction({
@@ -17,6 +17,21 @@ let msgSecCheck= (msg)=> {
   })
 
 }
+// 节流
+let throttle = (fn, time) => {
+  let enterTime = 0
+  let gapTime = time || 1000
+  return function () {
+    let _this = this
+    let backTime = new Date()
+    console.log("backTime - enterTime", backTime - enterTime);
+    if (backTime - enterTime > gapTime) {
+      fn.call(_this)
+      enterTime = backTime
+    }
+  }
+
+}
 Page({
   /**
    * 页面的初始数据
@@ -27,7 +42,7 @@ Page({
     audioArr: [],
     speech: false,
     voiceType: 101015,
-    loading:false,
+    loading: false,
     innerAudioContext: null,
     soundGenerator: [{
         voiceType: 101013,
@@ -43,6 +58,10 @@ Page({
       },
     ]
   },
+
+
+
+
 
   // 根据文本生成语音
   generatorAduio: function (text) {
@@ -66,7 +85,7 @@ Page({
   },
 
   // 播放语音
-  playAudio: async function () {
+  playAudio: throttle(async function () {
     this.destroyAudio()
     if (this.data.text == null || this.data.text == "") {
       wx.showToast({
@@ -97,7 +116,7 @@ Page({
     if (this.data.text != this.data.cacheText) {
       await new Promise((resolve, reject) => {
         this.setData({
-          loading:true
+          loading: true
         })
         textArr.forEach(async (text, index) => {
           let data = await this.generatorAduio(text)
@@ -106,7 +125,7 @@ Page({
             this.setData({
               audioArr: audioArr.slice(),
               cacheText: this.data.text,
-              loading:false
+              loading: false
             })
             resolve()
           }
@@ -126,7 +145,7 @@ Page({
       innerAudioContext.onPlay(() => {
         console.log('开始播放');
         this.setData({
-          speech:true
+          speech: true
         })
       });
       innerAudioContext.onError((res) => {
@@ -140,12 +159,12 @@ Page({
           return
         }
         this.setData({
-          speech:false
+          speech: false
         })
       })
     }
     play()
-  },
+  }),
 
   // 删除内容
   deleteContent: function () {
@@ -163,7 +182,7 @@ Page({
     this.data.innerAudioContext == null ? '' : this.data.innerAudioContext.destroy()
   },
 
-  
+
   // 获取粘贴板内容
   getClipboardData: function () {
     var _this = this
