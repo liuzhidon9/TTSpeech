@@ -6,12 +6,19 @@ let msgSecCheck = (msg) => {
   return new Promise((resolve, reject) => {
     wx.cloud.callFunction({
       name: "msgSecCheck",
+      data: {
+        msg: msg
+      },
       success: (res) => {
         let result = res.result
         resolve(result)
       },
       fail: (err) => {
-        console.log(err);
+        wx.showToast({
+          title: '内容含有违法违规内容!',
+          icon: 'none',
+          duration: 1500
+        })
       }
     })
   })
@@ -20,7 +27,7 @@ let msgSecCheck = (msg) => {
 // 节流
 let throttle = (fn, time) => {
   let enterTime = 0
-  let gapTime = time || 1000
+  let gapTime = time || 1500
   return function () {
     let _this = this
     let backTime = new Date()
@@ -95,17 +102,7 @@ Page({
       })
       return
     }
-
-    let result = await msgSecCheck(this.data.text) //违规文本检查
-    if (result.errCode == 87014 || result.errMsg == "risky content") {
-      wx.showToast({
-        title: '内容含有违法违规内容!',
-        icon: 'none',
-        duration: 1500
-      })
-      return
-    }
-
+    await msgSecCheck(this.data.text) //违规文本检查
     //切割文本
     let text = this.data.text + " "
     let textArr = text.match(/.{1,100}([,.:;?!，。：；！？、]|\n|\r|\s)/igm)
