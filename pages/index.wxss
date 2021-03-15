@@ -5,7 +5,8 @@
 }
 
 .content {
-  /* display: flex; *//* justify-content: center; */
+  /* display: flex; */
+  /* justify-content: center; */
   position: relative;
   box-shadow: 0 0 5px 0px rgba(0, 0, 0, 0.418);
   border-radius: 8px;
@@ -24,32 +25,36 @@
   padding: 10px 15px;
   box-sizing: border-box;
   display: flex;
-  justify-content:space-between;
+  justify-content: space-between;
   background-color: rgb(252, 252, 252);
 
 }
-.content .control-bar .radio{
-  width:8vw;
+
+.content .control-bar .radio {
+  width: 8vw;
   height: 8vw;
 }
 
-.content .control-bar .paste-delete{
-display: flex;
+.content .control-bar .paste-delete {
+  display: flex;
 
 }
+
 .content .control-bar .voice {
   display: flex;
   /* font-size: 26px; */
   align-items: center;
   justify-content: space-between;
   font-weight: bold;
-  
+
 }
-.content .control-bar .voice .tips{
- 
-  color:rgba(70, 34, 34, 0.664);
+
+.content .control-bar .voice .tips {
+
+  color: rgba(70, 34, 34, 0.664);
   font-size: 24px;
 }
+
 .content .control-bar .voice .manIcon {
   width: 8vw;
   height: 8vw;
@@ -67,7 +72,7 @@ display: flex;
 
 .content .content-text {
   width: 100%;
-  height:60vw;
+  height: 60vw;
   box-sizing: border-box;
   /* border:1px solid red; */
   padding: 10px;
@@ -76,26 +81,23 @@ display: flex;
 
 button:not([size='mini']) {
   width: 60vw;
-  padding:10px 24px
+  padding: 10px 24px
 }
 
 button.genrater-audio {
-position: relative;
-  /* width:300px; *//* height: 12vw; */
+  position: relative;
   background-color: rgb(9, 157, 194);
   color: white;
   text-align: center;
-  /* line-height: 12vw; *//* margin:0 auto; */
-  margin-top: 20px;
-  border-radius: 8px;
-}
-button.genrater-audio text{
   font-size: 22px;
   line-height: 1em;
+  margin-top: 20px;
+  border-radius: 6px;
 }
-button.genrater-audio .rolling-loading{
+
+button.genrater-audio .rolling-loading {
   position: absolute;
-  top:50%;
+  top: 50%;
   left: 10px;
   transform: translateY(-50%);
 }

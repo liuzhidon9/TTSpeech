@@ -1,5 +1,20 @@
 // pages/index.js
 const plugin = getApp().plugin
+
+let orc = ()=>{
+  wx.cloud.init()
+  wx.cloud.callFunction({
+    name:"orc",
+    data:{},
+    success:(res)=>{
+      console.log(res.result.data);
+    },
+    fail:(err)=>{
+      console.log(err);
+    }
+  })
+}
+
 // 违规文字检测
 let msgSecCheck = (msg) => {
   wx.cloud.init()
@@ -214,6 +229,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: async function (options) {
+    orc()
     //获取本地缓存声音类型
     wx.getStorage({
       key: 'voiceType',

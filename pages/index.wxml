@@ -32,7 +32,7 @@
 
   <button class="genrater-audio" size="" bindtap="playAudio">
     <rolling-loading class="rolling-loading" wx:if="{{loading==true}}"></rolling-loading>
-    <text>生成语音</text>
+    生成语音
   </button>
 
 
