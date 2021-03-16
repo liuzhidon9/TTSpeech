@@ -1,12 +1,26 @@
 {
   "pages": [
-    "pages/index"
+    "pages/tts/index",
+    "pages/ocr/index"
   ],
   "plugins": {
     "QCloudAIVoice": {
       "version": "1.2.8",
       "provider": "wx3e17776051baf153"
-  }
+    }
+  },
+  "tabBar": {
+    "list": [{
+      "pagePath": "pages/tts/index",
+      "text": "TTS"
+    }, {
+      "pagePath": "pages/ocr/index",
+      "text": "OCR"
+    }]
+  },
+  "networkTimeout": {
+    "request": 10000,
+    "downloadFile": 10000
   },
   "window": {
     "backgroundTextStyle": "light",

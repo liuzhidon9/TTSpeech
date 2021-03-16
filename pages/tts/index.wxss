@@ -84,15 +84,20 @@ button:not([size='mini']) {
   padding: 10px 24px
 }
 
+
 button.genrater-audio {
   position: relative;
   background-color: rgb(9, 157, 194);
   color: white;
   text-align: center;
-  font-size: 22px;
-  line-height: 1em;
+  font-size: 24px;
+  line-height: 1.5em;
+  padding:5px 36px;
   margin-top: 20px;
   border-radius: 6px;
+}
+button.genrater-audio-hover{
+  background-color: rgb(4, 108, 134);
 }
 
 button.genrater-audio .rolling-loading {

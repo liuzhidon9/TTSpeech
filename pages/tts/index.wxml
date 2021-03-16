@@ -16,21 +16,21 @@
         </view>
       </view>
       <view class="radio" wx:if="{{speech==true}}">
-        <image src="../assets/img/Radio.gif"></image>
+        <image src="../../assets/img/Radio.gif"></image>
       </view>
       <view class="paste-delete">
         <view class="paste" bindtap="getClipboardData">
-          <image src="../assets/img/paste.png"></image>
+          <image src="../../assets/img/paste.png"></image>
         </view>
         <view bindtap="deleteContent" class="delete">
-          <image src="../assets/img/delete.png"></image>
+          <image src="../../assets/img/delete.png"></image>
         </view>
       </view>
     </view>
 
   </view>
 
-  <button class="genrater-audio" size="" bindtap="playAudio">
+  <button class="genrater-audio" hover-class="genrater-audio-hover" size="" bindtap="playAudio">
     <rolling-loading class="rolling-loading" wx:if="{{loading==true}}"></rolling-loading>
     生成语音
   </button>

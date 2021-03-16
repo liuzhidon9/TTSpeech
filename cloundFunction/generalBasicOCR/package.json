@@ -1,5 +1,5 @@
 {
-  "name": "orc",
+  "name": "generalBasicOCR",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -9,7 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "tencentcloud-sdk-nodejs": "^4.0.81",
+    "tencentcloud-sdk-nodejs": "^4.0.82",
     "wx-server-sdk": "~2.4.0"
   }
 }

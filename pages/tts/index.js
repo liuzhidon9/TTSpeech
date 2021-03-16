@@ -4,7 +4,7 @@ const plugin = getApp().plugin
 let orc = ()=>{
   wx.cloud.init()
   wx.cloud.callFunction({
-    name:"orc",
+    name:"generalBasicOCR",
     data:{},
     success:(res)=>{
       console.log(res.result.data);
@@ -69,21 +69,17 @@ Page({
     soundGenerator: [{
         voiceType: 101013,
         description: "智辉，新闻男生",
-        src: "../assets/img/man.png",
-        active: "../assets/img/man-active.png"
+        src: "../../assets/img/man.png",
+        active: "../../assets/img/man-active.png"
       },
       {
         voiceType: 101007,
         description: "智娜,客服女声",
-        src: "../assets/img/woman.png",
-        active: "../assets/img/woman-active.png"
+        src: "../../assets/img/woman.png",
+        active: "../../assets/img/woman-active.png"
       },
     ]
   },
-
-
-
-
 
   // 根据文本生成语音
   generatorAduio: function (text) {

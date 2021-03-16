@@ -1,5 +1,6 @@
-const tencentcloud = require("tencentcloud-sdk-nodejs");
+// 云函数入口文件
 // Depends on tencentcloud-sdk-nodejs version 4.0.3 or higher
+const tencentcloud = require("tencentcloud-sdk-nodejs");
 const OcrClient = tencentcloud.ocr.v20181119.Client;
 const clientConfig = {
   credential: {
@@ -15,17 +16,15 @@ const clientConfig = {
 };
 
 const client = new OcrClient(clientConfig);
+
 // 云函数入口函数
 exports.main = async (event, context) => {
-
   const params = {
     "ImageUrl": "https://ocr-demo-1254418846.cos.ap-guangzhou.myqcloud.com/general/GeneralBasicOCR/GeneralBasicOCR1.jpg"
   };
   let data = await client.GeneralBasicOCR(params)
-
   return {
     event,
-    data: data,
-
+    data
   }
 }
