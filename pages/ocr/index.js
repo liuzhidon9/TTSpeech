@@ -1,9 +1,9 @@
 // pages/ocr/index.js
-let orc = () => {
+let orc = (ImageUrl) => {
   wx.cloud.init()
   wx.cloud.callFunction({
     name: "generalBasicOCR",
-    data: {},
+    data: {ImageUrl:ImageUrl},
     success: (res) => {
       console.log(res.result.data);
     },
@@ -18,26 +18,47 @@ Page({
    * 页面的初始数据
    */
   data: {
-    isShowModal:false,
-    innerHtml: `
-<pre style="word-break:break-all;  white-space: pre-wrap;">
-    	
-企业微信
+    imgFilePath: '',
+    imgW: 0,
+    imgH: 0
 
-企业微信，是腾讯微信团队为企业打造的高效办公平台。与微信一致的沟通体验，丰富的OA应用，和连接微信生态的能力，助力企业高效沟通与管理。
-</pre>
-    `
   },
-  show:function(){
-    this.setData({
-      isShowModal:!this.data.isShowModal
+  chooseImage: function () {
+    wx.chooseImage({
+      count: 1,
+      success: (res) => {
+        console.log(res);
+        wx.getImageInfo({
+          src: res.tempFilePaths[0],
+          success: (res) => {
+            console.log(res);
+            let path = res.path
+            let buffArr = []
+            for (let i = 0; i < path.length; i++) {
+              buffArr.push(path.charCodeAt(i))
+            }
+            const arrayBuffer = new Uint8Array(buffArr)
+            const base64 = wx.arrayBufferToBase64(arrayBuffer)
+            orc('https://ocr-demo-1254418846.cos.ap-guangzhou.myqcloud.com/general/GeneralBasicOCR/GeneralBasicOCR1.jpg')
+            console.log("base64",base64);
+            this.setData({
+              imgFilePath: res.path,
+              imgW: res.width,
+              imgH: res.height
+            })
+          }
+        })
+
+      },
+      fail: (err) => {
+        console.log(err);
+      }
     })
   },
   /**
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-    let cameraContext = wx.createCameraContext()
 
   },
 

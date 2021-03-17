@@ -4,7 +4,7 @@
     "pages/ocr/index",
     "pages/tts/read-page/index"
   ],
-  "entryPagePath": "pages/tts/index",
+  "entryPagePath": "pages/ocr/index",
   "plugins": {
     "QCloudAIVoice": {
       "version": "1.3.0",

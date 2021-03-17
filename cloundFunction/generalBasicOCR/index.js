@@ -20,7 +20,7 @@ const client = new OcrClient(clientConfig);
 // 云函数入口函数
 exports.main = async (event, context) => {
   const params = {
-    "ImageUrl": "https://ocr-demo-1254418846.cos.ap-guangzhou.myqcloud.com/general/GeneralBasicOCR/GeneralBasicOCR1.jpg"
+    "ImageUrl":event.ImageUrl
   };
   let data = await client.GeneralBasicOCR(params)
   return {

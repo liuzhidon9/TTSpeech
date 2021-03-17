@@ -1,17 +1,19 @@
 // pages/tts/read-page/index.js
+import {
+  splitText
+} from '../../../utils/util.js'
 Page({
-
   /**
    * 页面的初始数据
    */
   data: {
-    htmlTemplate: '',
     audioArr: [],
-    innerHtml: ''
+    nodes: [],
+    innerAudioContext: null
   },
 
-  // playAudioBySrc 根据声音资源播放
-  playAudioBySrc: function (source) {
+  // _playAudioBySrc 根据声音资源播放
+  _playAudioBySrc: function (source) {
     return new Promise((resolve, reject) => {
       const innerAudioContext = wx.createInnerAudioContext();
       this.setData({
@@ -27,28 +29,73 @@ Page({
         console.log(res.errMsg)
       });
       innerAudioContext.onEnded(() => {
-        this.destroyAudio()
+        this._destroyAudio()
         resolve()
       })
     })
   },
 
-  _htmlTemplate:function(textContent){
-    return `<pre style="padding:10px;white-space: pre-wrap;word-break: break-all;" >${textContent} </pre>`
+  _nodesTemplate: function (textContent) {
+    let textArr = splitText(textContent)
+    // console.log('textArr',textArr,textContent);
+    //rich-text组件文档：https://developers.weixin.qq.com/miniprogram/dev/component/rich-text.html
+    let nodes = [{
+      name: 'pre',
+      attrs: {
+        class: 'pre_class',
+        style: 'white-space:pre-wrap;word-break:break-all;'
+      },
+      children: []
+    }]
+    let childrenNode = []
+    for (const text of textArr) {
+      text = text.replace(/\n|\r/, "\n\n")
+      childrenNode.push({
+        name: 'span',
+        read: false,
+        attrs: {
+          class: "",
+        },
+        children: [{
+          type: 'text',
+          text: text
+        }]
+      })
+    }
+    nodes[0].children = childrenNode
+    return nodes
   },
   // playingTextMatch 匹配正在播放的语音文字并高亮它
   _playingTextMatch: function (playingText) {
-    let htmlTemplate = this.data.htmlTemplate
-    let reg = new RegExp(playingText, "img")
-    let innerHtml = htmlTemplate.replace(reg, `<span class="macthStr">${playingText}</span>`)
-    console.log(innerHtml);
+    let nodes = this.data.nodes
+    let isMatch = false
+    nodes[0].children = nodes[0].children.map(item => {
+      let currentText = item.children[0].text.trim()
+      if (currentText === playingText && !item.read && !isMatch) {
+        isMatch = true
+        return {
+          ...item,
+          read: true,
+          attrs: {
+            class: "matchStr"
+          }
+        }
+      }
+      return {
+        ...item,
+        attrs: {
+          class: ""
+        }
+      }
+    })
+    console.log(nodes);
     this.setData({
-      innerHtml: innerHtml
+      nodes: nodes
     })
   },
 
-  // destroyAudio 移除声音播放
-  destroyAudio: function () {
+  // _destroyAudio 移除声音播放
+  _destroyAudio: function () {
     this.data.innerAudioContext == null ? '' : this.data.innerAudioContext.destroy()
     console.log('结束播放');
   },
@@ -58,17 +105,26 @@ Page({
   onLoad: function (options) {
     const eventChannel = this.getOpenerEventChannel()
     eventChannel.on("acceptDataFromOpenerPage", async (data) => {
-      let htmlTemplate = this._htmlTemplate(data.text)
+      console.log(data);
+      let nodes = this._nodesTemplate(data.text)
       let audioArr = data.audioArr
       this.setData({
-        innerHtml: htmlTemplate,
-        htmlTemplate: htmlTemplate
+        nodes: nodes,
       })
       for (const source of audioArr) {
-        await this.playAudioBySrc(source)
+        await this._playAudioBySrc(source)
       }
+      //语音朗读完毕，清楚文字高亮状态
+      nodes = this.data.nodes
+      nodes[0].children = nodes[0].children.map(item => {
+        return {
+          ...item,
+          attrs: {}
+        }
+      })
+      console.log(nodes);
       this.setData({
-        innerHtml: htmlTemplate
+        nodes: nodes,
       })
     })
   },
@@ -91,14 +147,14 @@ Page({
    * 生命周期函数--监听页面隐藏
    */
   onHide: function () {
-
+    this._destroyAudio()
   },
 
   /**
    * 生命周期函数--监听页面卸载
    */
   onUnload: function () {
-
+    this._destroyAudio()
   },
 
   /**

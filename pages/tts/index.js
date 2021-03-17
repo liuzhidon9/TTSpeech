@@ -1,4 +1,7 @@
 // pages/index.js
+import {
+  splitText
+} from '../../utils/util'
 const plugin = getApp().plugin
 // 违规文字检测
 let msgSecCheck = (msg) => {
@@ -83,7 +86,6 @@ Page({
   // goToRead 解析文本生成语音链接，然后跳转到朗读界面朗读
   goToRead: async function () {
     console.log(this.data.text);
-    if (this.data.speech) return
     if (this.data.text == null || this.data.text == "") {
       wx.showToast({
         title: '请输入内容 !',
@@ -105,14 +107,13 @@ Page({
       return
     }
     //切割文本
-    let text = this.data.text + " "
-    let textArr = text.match(/.{1,100}([,.:;?!，。：；！？、]|\s)/igm)
-    console.log(textArr);
-
+    let textArr = splitText(this.data.text)
+    console.log('textArr',textArr);
     let audioArr = this.data.audioArr.slice()
     if (this.data.text != this.data.cacheText) {
       audioArr = []
       wx.showLoading({
+        mask:true,
         title: '正在生成语音...',
       })
       for (const text of textArr) {
@@ -148,8 +149,6 @@ Page({
     //   await this.playAudioBySrc(source)
     // }
   },
-
-
 
   // clearState 清除播放状态
   clearState: function () {

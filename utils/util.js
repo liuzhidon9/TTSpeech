@@ -14,6 +14,13 @@ const formatNumber = n => {
   return n[1] ? n : '0' + n
 }
 
+const splitText = textContent => {
+  textContent = textContent + " "
+  let textArr = textContent.match(/.{1,100}([,.:;?!，。：；！？、]|\s)/igm)
+  return textArr
+}
+
 module.exports = {
-  formatTime: formatTime
+  formatTime: formatTime,
+  splitText: splitText
 }

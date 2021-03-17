@@ -1,4 +1,14 @@
 /* pages/tts/read-page/index.wxss */
-.macthStr {
+view{
+  height:100vh ;
+  border-radius: 2px;
+  box-shadow: 0 0 3px #999 inset;
+  overflow:scroll;
+}
+.pre_class {
+  padding: 10px;
+  font-size: 18px;
+}
+.matchStr {
   background-color: skyblue;
 }

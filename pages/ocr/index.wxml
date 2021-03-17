@@ -1,16 +1,5 @@
 <!--pages/ocr/index.wxml-->
-<!-- <view>
-  <rich-text nodes="{{innerHtml}}" ></rich-text>
-</view> -->
-<button bindtap="show">show</button>
-<input class="weui-input" maxlength="10" placeholder="最大输入长度为10" />
-<page-container show="{{isShowModal}}" duration="500" close-on-slideDown="true">
-  <view class="popup">xxxx
-  
-    <input class="weui-input" maxlength="10" placeholder="最大输入长度为10" />
-    xpopup
-    popuppopuppop
-    uppopupp
-    opuppopupxx    <button bindtap="show">show</button></view>
-
-</page-container>
+<view>
+  <button bindtap="chooseImage">选择图片</button>
+  <image mode="aspectFit" webp="true" src="{{imgFilePath}}" />
+</view>
