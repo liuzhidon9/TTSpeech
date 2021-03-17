@@ -1,0 +1,4 @@
+/* pages/tts/read-page/index.wxss */
+.macthStr {
+  background-color: skyblue;
+}

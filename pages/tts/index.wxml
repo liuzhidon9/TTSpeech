@@ -27,13 +27,8 @@
         </view>
       </view>
     </view>
-
   </view>
-
-  <button class="genrater-audio" hover-class="genrater-audio-hover" size="" bindtap="playAudio">
-    <rolling-loading class="rolling-loading" wx:if="{{loading==true}}"></rolling-loading>
-    生成语音
+  <button class="genrater-audio" hover-class="genrater-audio-hover" size="" bindtap="goToRead">
+    朗读文字
   </button>
-
-
 </view>

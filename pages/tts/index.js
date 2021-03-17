@@ -1,20 +1,5 @@
 // pages/index.js
 const plugin = getApp().plugin
-
-let orc = ()=>{
-  wx.cloud.init()
-  wx.cloud.callFunction({
-    name:"generalBasicOCR",
-    data:{},
-    success:(res)=>{
-      console.log(res.result.data);
-    },
-    fail:(err)=>{
-      console.log(err);
-    }
-  })
-}
-
 // 违规文字检测
 let msgSecCheck = (msg) => {
   wx.cloud.init()
@@ -29,30 +14,10 @@ let msgSecCheck = (msg) => {
         resolve(result)
       },
       fail: (err) => {
-        wx.showToast({
-          title: '内容含有违法违规内容!',
-          icon: 'none',
-          duration: 1500
-        })
+        reject(err)
       }
     })
   })
-
-}
-// 节流
-let throttle = (fn, time) => {
-  let enterTime = 0
-  let gapTime = time || 1500
-  return function () {
-    let _this = this
-    let backTime = new Date()
-    console.log("backTime - enterTime", backTime - enterTime);
-    if (backTime - enterTime > gapTime) {
-      fn.call(_this)
-      enterTime = backTime
-    }
-  }
-
 }
 Page({
   /**
@@ -64,7 +29,6 @@ Page({
     audioArr: [],
     speech: false,
     voiceType: 101015,
-    loading: false,
     innerAudioContext: null,
     soundGenerator: [{
         voiceType: 101013,
@@ -84,6 +48,11 @@ Page({
   // 根据文本生成语音
   generatorAduio: function (text) {
     return new Promise((resolve, reject) => {
+      text = text.trim()
+      if (text.length === 0) {
+        resolve();
+        return
+      }
       plugin.QCloudAIVoice.textToSpeech({
         content: text,
         speed: 0,
@@ -95,16 +64,26 @@ Page({
         success: function (data) {
           resolve(data)
         },
-        fail: function (error) {
-          reject(error);
+        fail: (error) => {
+          this.clearState()
+          wx.showToast({
+            title: '无法解析文本内容！',
+            icon: 'none',
+            duration: 1500
+          })
+          console.log(error.Error);
+          reject(error)
         }
       })
     })
   },
 
-  // 播放语音
-  playAudio: throttle(async function () {
-    this.destroyAudio()
+
+
+  // goToRead 解析文本生成语音链接，然后跳转到朗读界面朗读
+  goToRead: async function () {
+    console.log(this.data.text);
+    if (this.data.speech) return
     if (this.data.text == null || this.data.text == "") {
       wx.showToast({
         title: '请输入内容 !',
@@ -113,83 +92,87 @@ Page({
       })
       return
     }
-    await msgSecCheck(this.data.text) //违规文本检查
+
+    //违规文本检查
+    try {
+      await msgSecCheck(this.data.text)
+    } catch (error) {
+      wx.showToast({
+        title: '文本含有违法违规内容!',
+        icon: 'none',
+        duration: 1500
+      })
+      return
+    }
     //切割文本
     let text = this.data.text + " "
-    let textArr = text.match(/.{1,100}([,.:;?!，。：；！？、]|\n|\r|\s)/igm)
+    let textArr = text.match(/.{1,100}([,.:;?!，。：；！？、]|\s)/igm)
     console.log(textArr);
-    let audioArr = textArr.map((item) => {
-      return 0
-    })
+
+    let audioArr = this.data.audioArr.slice()
     if (this.data.text != this.data.cacheText) {
-      await new Promise((resolve, reject) => {
-        this.setData({
-          loading: true
-        })
-        textArr.forEach(async (text, index) => {
-          let data = await this.generatorAduio(text)
-          audioArr.splice(index, 1, data.result.filePath)
-          if (audioArr.indexOf(0) == -1) {
-            this.setData({
-              audioArr: audioArr.slice(),
-              cacheText: this.data.text,
-              loading: false
-            })
-            resolve()
-          }
-        })
+      audioArr = []
+      wx.showLoading({
+        title: '正在生成语音...',
       })
-    } else {
-      audioArr = this.data.audioArr.slice()
-    }
-
-    let play = () => {
-      const innerAudioContext = wx.createInnerAudioContext();
-      this.setData({
-        innerAudioContext: innerAudioContext
-      })
-      innerAudioContext.src = audioArr.shift();
-      innerAudioContext.play()
-      innerAudioContext.onPlay(() => {
-        console.log('开始播放');
-        this.setData({
-          speech: true
-        })
-      });
-      innerAudioContext.onError((res) => {
-        console.log(res.errMsg)
-      });
-      innerAudioContext.onEnded(() => {
-        innerAudioContext.destroy()
-        if (audioArr.length > 0) {
-          play()
-          console.log('播放结束');
-          return
+      for (const text of textArr) {
+        if (this.data.text === '') return //如果正在生成语音的时候用户删除了文本内容，马上停止后面的动作
+        let data = await this.generatorAduio(text)
+        if (data) {
+          let filePath = data.result.filePath
+          let origin = data.result.origin
+          audioArr.push({
+            filePath: filePath,
+            origin: origin
+          })
         }
-        this.setData({
-          speech: false
-        })
+      }
+      this.setData({
+        audioArr: audioArr.slice(),
+        cacheText: this.data.text,
       })
+      wx.hideLoading()
     }
-    play()
-  }),
+    wx.navigateTo({
+      url: './read-page/index',
+      success: (res) => {
+        // 通过eventChannel向被打开页面传送数据
+        res.eventChannel.emit('acceptDataFromOpenerPage', {
+          text: this.data.text,
+          audioArr: this.data.audioArr
+        })
+      }
+    })
+    // for (const source of audioArr) {
+    //   if (this.data.text === '') return //如果正在播放语音的时候用户删除了文本内容，马上停止后面的动作
+    //   await this.playAudioBySrc(source)
+    // }
+  },
 
-  // 删除内容
+
+
+  // clearState 清除播放状态
+  clearState: function () {
+    this.setData({
+      speech: false,
+    })
+    wx.hideLoading()
+  },
+
+  // deleteContent 删除内容
   deleteContent: function () {
     // console.log('删除')
     this.setData({
       text: '',
-      src: null,
-      speech: false
     })
     this.destroyAudio()
   },
-
+  // destroyAudio 移除声音播放
   destroyAudio: function () {
-    //移除声音播放
     this.data.innerAudioContext == null ? '' : this.data.innerAudioContext.destroy()
+    this.clearState()
+    console.log('结束播放');
   },
-
 
   // 获取粘贴板内容
   getClipboardData: function () {
@@ -225,7 +208,7 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: async function (options) {
-    orc()
+
     //获取本地缓存声音类型
     wx.getStorage({
       key: 'voiceType',

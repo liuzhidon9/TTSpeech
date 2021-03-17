@@ -1,0 +1,4 @@
+<!--pages/tts/read-page/index.wxml-->
+<view>
+  <rich-text nodes="{{innerHtml}}" ></rich-text>
+</view>
