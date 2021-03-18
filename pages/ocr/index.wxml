@@ -1,5 +1,11 @@
 <!--pages/ocr/index.wxml-->
-<view>
+<view id="ocr" bindtouchstart="touchStart" bindtouchmove="touchMove" bindtouchend="touchEnd" bindtouchcancel="touchCancel">
   <button bindtap="chooseImage">选择图片</button>
-  <image mode="aspectFit" webp="true" src="{{imgFilePath}}" />
+    <view class="image-wrap" style="width:{{imgW*newScale}}px;height:{{imgH*newScale}}px;" >
+      <view class="text-box" wx:for="{{textDetections}}" wx:for-index="index" wx:for-item="item"
+      style="width:{{item.ItemPolygon.Width*zoomRatio-1}}px; height:{{item.ItemPolygon.Height*zoomRatio-1}}px; top:{{item.Polygon[0].Y*zoomRatio}}px;left:{{item.Polygon[0].X*zoomRatio}}px;transform: rotate({{angel}}deg);">
+    </view>
+      <image webp="true" src="{{imgFilePath}}" style="width:{{imgW}}px;height:{{imgH}}px;transform:scale(newScale)" />
+    </view>
+
 </view>

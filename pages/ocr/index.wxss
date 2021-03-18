@@ -1,5 +1,23 @@
 /* pages/ocr/index.wxss */
-view{
+view#ocr {
   width: 100vw;
-  height:100vh;
+  height: 100vh;
+  overflow: scroll;
+}
+
+.image-wrap {
+  position: relative;
+  /* position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 9; */
+  display:flex ;
+  justify-content: center;
+  align-items: center;
+}
+
+.text-box {
+  position: absolute;
+  z-index: 10;
+  border: 1px solid red;
 }

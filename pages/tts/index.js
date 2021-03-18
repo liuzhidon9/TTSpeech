@@ -108,12 +108,12 @@ Page({
     }
     //切割文本
     let textArr = splitText(this.data.text)
-    console.log('textArr',textArr);
+    console.log('textArr', textArr);
     let audioArr = this.data.audioArr.slice()
     if (this.data.text != this.data.cacheText) {
       audioArr = []
       wx.showLoading({
-        mask:true,
+        mask: true,
         title: '正在生成语音...',
       })
       for (const text of textArr) {
