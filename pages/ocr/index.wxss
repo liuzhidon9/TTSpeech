@@ -7,10 +7,6 @@ view#ocr {
 
 .image-wrap {
   position: relative;
-  /* position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 9; */
   display:flex ;
   justify-content: center;
   align-items: center;
