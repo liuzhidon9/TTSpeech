@@ -1,0 +1,66 @@
+var scaleDataStore = {
+  scale: 1,
+  originScale: 1,
+  pointA: null,
+  pointB: null
+}
+
+var _getDistance = function (pointA, pointB) {
+  var distance = Math.sqrt(Math.pow(pointA.pageX - pointB.pageX, 2) + Math.pow(pointA.pageY - pointB.pageY, 2))
+  return distance
+}
+
+module.exports = {
+  touchStart: function (event, ownerInstance) {
+    console.log('touchStart: ');
+    //第一个触摸点
+    if (!scaleDataStore.pointA) {
+      scaleDataStore.pointA = {
+        pageX: event.changedTouches[0].pageX,
+        pageY: event.changedTouches[0].pageY
+      }
+    }
+    scaleDataStore.originScale = scaleDataStore.scale
+  },
+  touchMove: function (event, ownerInstance) {
+    console.log('touchMove: ', event.changedTouches);
+    if (event.changedTouches.length !== 2) return 
+    //第二个触摸点
+    if (!scaleDataStore.pointB) {
+      scaleDataStore.pointB = {
+        pageX: event.changedTouches[1].pageX,
+        pageY: event.changedTouches[1].pageY
+      }
+    }
+    var pointA = {
+      pageX: event.changedTouches[0].pageX,
+      pageY: event.changedTouches[0].pageY
+    }
+    var pointB = {
+      pageX: event.changedTouches[1].pageX,
+      pageY: event.changedTouches[1].pageY
+    }
+    var zoomRatio = _getDistance(pointA, pointB) / _getDistance(scaleDataStore.pointA, scaleDataStore.pointB)
+    var newScale = zoomRatio * scaleDataStore.originScale
+
+    if (newScale > 3) {
+      newScale = 3
+    }
+    if (newScale < 1) {
+      newScale = 1
+    }
+    scaleDataStore.scale = newScale
+    var instance = ownerInstance.selectComponent(".ocr-container")
+    instance.callMethod("updateNewScale",{newScale:newScale})
+  },
+  touchEnd: function () {
+    console.log('touchEnd');
+    delete scaleDataStore.pointA
+    delete scaleDataStore.pointB
+  },
+  touchCancel: function () {
+    console.log('touchCancel');
+    delete scaleDataStore.pointA
+    delete scaleDataStore.pointB
+  }
+}

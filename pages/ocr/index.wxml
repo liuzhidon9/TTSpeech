@@ -1,15 +1,25 @@
 <!--pages/ocr/index.wxml-->
-<wxs module="scale" src="./scale.wxs"></wxs>
-<view id="ocr" bindtouchstart="{{scale.touchStart}}">
-  <button bindtap="chooseImage">选择图片</button>
-  <view class="image-wrap" style="width:{{imgW*newScale}}px;height:{{imgH*newScale}}px;">
-    <block wx:if="{{textDetections.lenght!==0}}">
-      <view class="text-box" wx:for="{{textDetections}}" wx:for-index="index" wx:for-item="item"
-        style="width:{{item.width*newScale}}px; height:{{item.height*newScale}}px; top:{{item.top*newScale}}px;left:{{item.left*newScale}}px;transform:rotate({{angel}}deg);">
+<wxs module="scale" src="./utils/scale.wxs"></wxs>
+<view id="app">
+  <image class="chooseImage" bindtap="chooseImage" src="../../assets/img/ocrSelect.png"></image>
+  <page-container show="{{isShow}}">
+    <view class="container">
+      <icon class="cancel" type="cancel" color="gray" size="26" bindtap="close"></icon>
+      <view class="popup">{{activeText}}</view>
+      <view class="ocr-container" bindtouchstart="{{scale.touchStart}}" bindtouchmove="{{scale.touchMove}}"
+        bindtouchend="{{scale.touchEnd}}" bindtouchcancel="{{scale.touchCancel}}">
+        <view class="image-wrap" style="width:{{imgW*newScale}}px;height:{{imgH*newScale}}px;">
+          <block wx:if="{{textDetections.lenght!==0}}">
+            <view class="text-box {{index===activeBoxIndex?'active':''}}" wx:for="{{textDetections}}"
+              wx:for-index="index" wx:key="index" wx:for-item="item" data-index="{{index}}" data-text="{{item.text}}"
+              bindtap="activeBox"
+              style="width:{{item.width*newScale-1}}px; height:{{item.height*newScale-1}}px; top:{{item.top*newScale}}px;left:{{item.left*newScale}}px;transform:rotate({{angel}}deg);">
+            </view>
+          </block>
+          <image class="img" webp="true" src="{{imgFilePath}}"
+            style="width:{{imgW}}px;height:{{imgH}}px;transform:scale({{newScale}}); transform-origin:center;" />
+        </view>
       </view>
-    </block>
-    <image webp="true" src="{{imgFilePath}}"
-      style="width:{{imgW}}px;height:{{imgH}}px;transform:scale({{newScale}}); transform-origin:center;" />
-  </view>
-
+    </view>
+  </page-container>
 </view>

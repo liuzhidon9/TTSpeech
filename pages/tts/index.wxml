@@ -9,10 +9,9 @@
         <view class="tips">
           Voice:
         </view>
-        <view class="manIcon" wx:for="{{soundGenerator}}" wx:key="index" data-voiceType="{{item.voiceType}}"
-          bindtap="changeVoice">
-          <image src="{{item.active}}" wx:if="{{voiceType==item.voiceType}}"></image>
-          <image src="{{item.src}}" wx:else></image>
+        <view class="manIcon" wx:for="{{readers}}" wx:key="index" data-voiceType="{{item.voiceType}}"
+          bindtap="changeVoiceType">
+          <image src="{{voiceType==item.voiceType?item.src.active:item.src.deactive}}"></image>
         </view>
       </view>
       <view class="radio" wx:if="{{speech==true}}">

@@ -1,27 +1,11 @@
 // pages/index.js
 import {
-  splitText
+  splitText,
+  generatorAduio,
+  msgSecCheck
 } from '../../utils/util'
-const plugin = getApp().plugin
-// 违规文字检测
-let msgSecCheck = (msg) => {
-  wx.cloud.init()
-  return new Promise((resolve, reject) => {
-    wx.cloud.callFunction({
-      name: "msgSecCheck",
-      data: {
-        msg: msg
-      },
-      success: (res) => {
-        let result = res.result
-        resolve(result)
-      },
-      fail: (err) => {
-        reject(err)
-      }
-    })
-  })
-}
+
+
 Page({
   /**
    * 页面的初始数据
@@ -33,53 +17,26 @@ Page({
     speech: false,
     voiceType: 101015,
     innerAudioContext: null,
-    soundGenerator: [{
+    readers: [{
         voiceType: 101013,
         description: "智辉，新闻男生",
-        src: "../../assets/img/man.png",
-        active: "../../assets/img/man-active.png"
+        src: {
+          deactive: "../../assets/img/man.png",
+          active: "../../assets/img/man-active.png"
+        }
       },
       {
         voiceType: 101007,
         description: "智娜,客服女声",
-        src: "../../assets/img/woman.png",
-        active: "../../assets/img/woman-active.png"
+        src: {
+          deactive: "../../assets/img/woman.png",
+          active: "../../assets/img/woman-active.png"
+        }
       },
     ]
   },
 
-  // 根据文本生成语音
-  generatorAduio: function (text) {
-    return new Promise((resolve, reject) => {
-      text = text.trim()
-      if (text.length === 0) {
-        resolve();
-        return
-      }
-      plugin.QCloudAIVoice.textToSpeech({
-        content: text,
-        speed: 0,
-        volume: 0,
-        voiceType: this.data.voiceType,
-        language: 1,
-        projectId: 0,
-        sampleRate: 16000,
-        success: function (data) {
-          resolve(data)
-        },
-        fail: (error) => {
-          this.clearState()
-          wx.showToast({
-            title: '无法解析文本内容！',
-            icon: 'none',
-            duration: 1500
-          })
-          console.log(error.Error);
-          reject(error)
-        }
-      })
-    })
-  },
+
 
 
 
@@ -118,7 +75,10 @@ Page({
       })
       for (const text of textArr) {
         if (this.data.text === '') return //如果正在生成语音的时候用户删除了文本内容，马上停止后面的动作
-        let data = await this.generatorAduio(text)
+        let data = await generatorAduio({
+          content: text,
+          voiceType: this.data.voiceType
+        })
         if (data) {
           let filePath = data.result.filePath
           let origin = data.result.origin
@@ -144,10 +104,6 @@ Page({
         })
       }
     })
-    // for (const source of audioArr) {
-    //   if (this.data.text === '') return //如果正在播放语音的时候用户删除了文本内容，马上停止后面的动作
-    //   await this.playAudioBySrc(source)
-    // }
   },
 
   // clearState 清除播放状态
@@ -185,7 +141,7 @@ Page({
     })
   },
   // 选择声音
-  changeVoice: function (e) {
+  changeVoiceType: function (e) {
     console.log(e.currentTarget.dataset)
     var voiceType = e.currentTarget.dataset.voicetype
     this.setData({

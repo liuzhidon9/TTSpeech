@@ -1,5 +1,6 @@
 // pages/ocr/index.js
 //腾讯云通用印刷体识别文档：https://cloud.tencent.com/document/api/866/33526
+import {} from '../../utils/util'
 let orc = (ImageBase64) => {
   wx.cloud.init()
   return new Promise((resolve, reject) => {
@@ -12,17 +13,17 @@ let orc = (ImageBase64) => {
         resolve(res.result.data)
       },
       fail: (err) => {
+       wx.showToast({
+        title: "错误码："+err.errCode,
+        icon: 'none',
+        duration: 2000
+      })
         reject(err)
       }
     })
   })
 }
-let scaleDataStore = {
-  scale: 1,
-  originScale: 1,
-  pointA: null,
-  pointB: null
-}
+
 Page({
   /**
    * 页面的初始数据
@@ -34,8 +35,25 @@ Page({
     textDetections: [], //文本检测内容
     angel: 0, //修正角度
     newScale: 1, //图片缩放比例
+    activeBoxIndex:-1,
+    activeText:'',
+    isShow:false
   },
 
+  activeBox:function(event){
+    let index = event.currentTarget.dataset.index
+    let text = event.currentTarget.dataset.text
+    console.log("activeBox",index,text);
+    this.setData({
+      activeBoxIndex:index,
+      activeText:text
+    })
+  },
+  close:function(){
+    this.setData({
+      isShow:false
+    })
+  },
   chooseImage: function () {
     wx.chooseImage({
       count: 1,
@@ -52,10 +70,9 @@ Page({
           imgW: imgWidth * zoomRatio,
           imgH: imgHeight * zoomRatio,
           textDetections: [],
-          newScale: 1
+          newScale: 1,
+          isShow:true
         })
-        scaleDataStore.scale = 1
-        scaleDataStore.originScale = 1
         await this._scanTextByFilePath(filePath)
       },
       fail: (err) => {
@@ -63,7 +80,13 @@ Page({
       }
     })
   },
-
+  //该函数供scale.wxs调用
+  updateNewScale: function (payload) {
+    console.log('updateNewScale', payload);
+    this.setData({
+      newScale: payload.newScale
+    })
+  },
   //scanTextByFilePath 扫描图片文本内容
   _scanTextByFilePath: async function (filePath) {
     wx.showLoading({
@@ -115,63 +138,6 @@ Page({
         }
       })
     })
-  },
-  touchStart: function (event) {
-    console.log('touchStart: ', event.changedTouches);
-    //第一个触摸点
-    if (!scaleDataStore.pointA) {
-      scaleDataStore.pointA = {
-        pageX: event.changedTouches[0].pageX,
-        pageY: event.changedTouches[0].pageY
-      }
-    }
-    scaleDataStore.originScale = scaleDataStore.scale
-  },
-  touchMove: function (event) {
-    console.log('touchMove: ', event.changedTouches);
-    if (event.changedTouches.length !== 2) return
-    //第二个触摸点
-    if (!scaleDataStore.pointB) {
-      scaleDataStore.pointB = {
-        pageX: event.changedTouches[1].pageX,
-        pageY: event.changedTouches[1].pageY
-      }
-    }
-    let pointA = {
-      pageX: event.changedTouches[0].pageX,
-      pageY: event.changedTouches[0].pageY
-    }
-    let pointB = {
-      pageX: event.changedTouches[1].pageX,
-      pageY: event.changedTouches[1].pageY
-    }
-    let zoomRatio = this._getDistance(pointA, pointB) / this._getDistance(scaleDataStore.pointA, scaleDataStore.pointB)
-    let newScale = zoomRatio * scaleDataStore.originScale
-
-    if (newScale > 3) {
-      newScale = 3
-    }
-    if (newScale < 1) {
-      newScale = 1
-    }
-    scaleDataStore.scale = newScale
-    this.setData({
-      newScale: newScale,
-    })
-  },
-  _getDistance: function (pointA, pointB) {
-    let distance = Math.sqrt(Math.pow(pointA.pageX - pointB.pageX, 2) + Math.pow(pointA.pageY - pointB.pageY, 2))
-    return distance
-  },
-  touchEnd: function () {
-    console.log('touchEnd');
-    delete scaleDataStore.pointA
-    delete scaleDataStore.pointB
-  },
-  touchCancel: function () {
-    console.log('touchCancel');
-    delete scaleDataStore.pointA
-    delete scaleDataStore.pointB
   },
 
   /**

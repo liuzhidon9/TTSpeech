@@ -12,14 +12,19 @@
     }
   },
   "tabBar": {
-    "list": [
-      {
+    "color":"#bfbfbf",
+    "selectedColor": "#1296db",
+    "list": [{
         "pagePath": "pages/tts/index",
-        "text": "TTS"
+        "text": "TTS",
+        "iconPath": "./assets/tabar/tts-deactive.png",
+        "selectedIconPath": "./assets/tabar/tts-active.png"
       },
       {
         "pagePath": "pages/ocr/index",
-        "text": "OCR"
+        "text": "OCR",
+        "iconPath": "./assets/tabar/ocr-deactive.png",
+        "selectedIconPath": "./assets/tabar/ocr-active.png"
       }
     ]
   },

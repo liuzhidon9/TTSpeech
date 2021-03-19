@@ -1,19 +1,65 @@
 /* pages/ocr/index.wxss */
-view#ocr {
+view#app {
   width: 100vw;
   height: 100vh;
-  overflow: scroll;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+}
+view#app image.chooseImage{
+  width: 120px;
+  height:80px;
+  box-shadow: 0 0 300px skyblue;
+  background-color: #fff;
+  border-radius: 3px;
+}
+view#app page-container .container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
 }
 
-.image-wrap {
+view#app page-container .container icon.cancel {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  z-index: 1;
+}
+
+view#app view.ocr-container {
+  width: 100vw;
+  height: 85vh;
+  overflow: scroll;
+  font-size: 0;
+}
+
+view#app page-container .container .popup {
+  width: 100vw;
+  height: 15vh;
+  background-color:#eee;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  box-shadow: 0 0 3px #999;
+  z-index: 1;
+}
+
+view#app view.ocr-container .image-wrap {
   position: relative;
-  display:flex ;
+  display: flex;
   justify-content: center;
   align-items: center;
 }
 
-.text-box {
+view#app view.ocr-container .image-wrap .text-box {
   position: absolute;
   z-index: 10;
-  border: 1px solid red;
+  border: 1px solid lightcoral;
+  border-radius: 1px;
+}
+
+view#app view.ocr-container .image-wrap .text-box.active {
+  background-color: rgba(135, 232, 235, 0.3);
+  border-color: red;
 }
