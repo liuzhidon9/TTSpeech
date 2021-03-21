@@ -57,6 +57,7 @@ view#app view.ocr-container .image-wrap .text-box {
   z-index: 10;
   border: 1px solid lightcoral;
   border-radius: 1px;
+ 
 }
 
 view#app view.ocr-container .image-wrap .text-box.active {

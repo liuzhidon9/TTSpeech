@@ -1,13 +1,16 @@
 // pages/ocr/index.js
 //腾讯云通用印刷体识别文档：https://cloud.tencent.com/document/api/866/33526
 import {} from '../../utils/util'
-let orc = (ImageBase64) => {
+let orc = (filePath) => {
   wx.cloud.init()
   return new Promise((resolve, reject) => {
     wx.cloud.callFunction({
       name: "generalBasicOCR",
       data: {
-        ImageBase64: ImageBase64
+        ImageUrl:  wx.cloud.CDN({
+          type: 'filePath',
+          filePath: filePath,
+        })
       },
       success: (res) => {
         resolve(res.result.data)
@@ -92,9 +95,7 @@ Page({
     wx.showLoading({
       title: '扫描中...',
     })
-    let fileSystemManager = wx.getFileSystemManager()
-    let imageBase64 = fileSystemManager.readFileSync(filePath, "base64")
-    let ocrData = await orc(imageBase64)
+    let ocrData = await orc(filePath)
     console.log('ocrData', ocrData);
     let {
       zoomRatio
