@@ -1,7 +1,7 @@
 // pages/index.js
 import {
   splitText,
-  generatorAduio,
+  generatorAudio,
   msgSecCheck
 } from '../../utils/util'
 
@@ -75,7 +75,7 @@ Page({
       })
       for (const text of textArr) {
         if (this.data.text === '') return //如果正在生成语音的时候用户删除了文本内容，马上停止后面的动作
-        let data = await generatorAduio({
+        let data = await generatorAudio({
           content: text,
           voiceType: this.data.voiceType
         })

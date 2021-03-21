@@ -1,4 +1,5 @@
 <!--pages/tts/read-page/index.wxml-->
-<view>
+<view id="app">
+  <button class="restart" hover-class="restart-hover" bindtap="start" wx:if="{{!isRead}}"><image src="../../../assets/img/re-start.png"></image></button>
   <rich-text nodes="{{nodes}}" ></rich-text>
 </view>

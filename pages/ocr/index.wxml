@@ -1,11 +1,12 @@
 <!--pages/ocr/index.wxml-->
 <wxs module="scale" src="./utils/scale.wxs"></wxs>
 <view id="app">
+
   <image class="chooseImage" bindtap="chooseImage" src="../../assets/img/ocrSelect.png"></image>
-  <page-container show="{{isShow}}">
+  <page-container show="{{isShow}}" bind:afterleave="resetData">
     <view class="container">
-      <icon class="cancel" type="cancel" color="gray" size="26" bindtap="close"></icon>
-      <view class="popup">{{activeText}}</view>
+      <icon class="cancel" type="cancel" color="gray" size="26" bindtap="resetData"></icon>
+      <view class="read-box"><text>{{activeText}}</text><button class="read" hover-class="read-hover" bindtap="read"><image src="../../assets/img/read.png"></image></button></view>
       <view class="ocr-container" bindtouchstart="{{scale.touchStart}}" bindtouchmove="{{scale.touchMove}}"
         bindtouchend="{{scale.touchEnd}}" bindtouchcancel="{{scale.touchCancel}}">
         <view class="image-wrap" style="width:{{imgW*newScale}}px;height:{{imgH*newScale}}px;">

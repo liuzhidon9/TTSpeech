@@ -1,11 +1,32 @@
 /* pages/tts/read-page/index.wxss */
-view{
-  height:100vh ;
+view#app{
+  width: 100vw;
+  height: 100vh;
   border-radius: 2px;
   box-shadow: 0 0 3px #999 inset;
-  overflow:scroll;
+  overflow: scroll;
+}
+view#app button.restart{
+  width: 60px;
+  height: 60px;
+  padding:10px;
+  position: absolute;
+  top:70%;
+  left: 50%;
+  transform: translateX(-30px);
+  border-radius: 50%;
+  box-shadow: 0 0 3px rgb(190, 190, 190);
+}
+view button.restart-hover {
+  background-color: #eee;
+}
+
+view button.restart image{
+  width: 100%;
+  height: 100%;
 }
 .pre_class {
+
   padding: 10px;
   font-size: 18px;
 }

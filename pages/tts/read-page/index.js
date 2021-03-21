@@ -9,9 +9,33 @@ Page({
   data: {
     audioArr: [],
     nodes: [],
-    innerAudioContext: null
+    innerAudioContext: null,
+    isRead: true,
+    audioArr: {}
   },
-
+  start:async function () {
+    this.setData({
+      isRead:false
+    })
+    let audioArr = this.data.audioArr
+    for (const source of audioArr) {
+      await this._playAudioBySrc(source)
+    }
+    //语音朗读完毕，清楚文字高亮状态
+   let  nodes = this.data.nodes
+    nodes[0].children = nodes[0].children.map(item => {
+      return {
+        ...item,
+        read:false,
+        attrs: {}
+      }
+    })
+    console.log(nodes);
+    this.setData({
+      nodes: nodes,
+      isRead:false
+    })
+  },
   // _playAudioBySrc 根据声音资源播放
   _playAudioBySrc: function (source) {
     return new Promise((resolve, reject) => {
@@ -110,22 +134,9 @@ Page({
       let audioArr = data.audioArr
       this.setData({
         nodes: nodes,
+        audioArr: audioArr
       })
-      for (const source of audioArr) {
-        await this._playAudioBySrc(source)
-      }
-      //语音朗读完毕，清楚文字高亮状态
-      nodes = this.data.nodes
-      nodes[0].children = nodes[0].children.map(item => {
-        return {
-          ...item,
-          attrs: {}
-        }
-      })
-      console.log(nodes);
-      this.setData({
-        nodes: nodes,
-      })
+      this.start()
     })
   },
 

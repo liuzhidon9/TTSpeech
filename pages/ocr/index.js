@@ -1,26 +1,30 @@
 // pages/ocr/index.js
 //腾讯云通用印刷体识别文档：https://cloud.tencent.com/document/api/866/33526
-import {} from '../../utils/util'
-let orc = (filePath) => {
+import {
+  generatorAudio,
+  msgSecCheck
+} from '../../utils/util.js'
+let ocr = (filePath) => {
   wx.cloud.init()
   return new Promise((resolve, reject) => {
     wx.cloud.callFunction({
       name: "generalBasicOCR",
       data: {
-        ImageUrl:  wx.cloud.CDN({
+        ImageUrl: wx.cloud.CDN({
           type: 'filePath',
           filePath: filePath,
         })
       },
       success: (res) => {
-        resolve(res.result.data)
+        // console.log(res);
+        resolve(res.result)
       },
       fail: (err) => {
-       wx.showToast({
-        title: "错误码："+err.errCode,
-        icon: 'none',
-        duration: 2000
-      })
+        wx.showToast({
+          title: "错误码：" + err.errCode,
+          icon: 'none',
+          duration: 2000
+        })
         reject(err)
       }
     })
@@ -38,23 +42,86 @@ Page({
     textDetections: [], //文本检测内容
     angel: 0, //修正角度
     newScale: 1, //图片缩放比例
-    activeBoxIndex:-1,
-    activeText:'',
-    isShow:false
+    activeBoxIndex: -1,
+    activeText: '',
+    cacheText: '',
+    audioSrc: '',
+    isShow: false,
+    isRead: false
   },
-
-  activeBox:function(event){
+  //重置数据
+  resetData: function () {
+    this.setData({
+      imgFilePath: '',
+      imgW: 0, //图片宽度
+      imgH: 0, //图片高度
+      textDetections: [], //文本检测内容
+      angel: 0, //修正角度
+      newScale: 1, //图片缩放比例
+      activeBoxIndex: -1,
+      activeText: '',
+      cacheText: '',
+      audioSrc: '',
+      isShow: false,
+      isRead: false
+    }, )
+  },
+  activeBox: function (event) {
     let index = event.currentTarget.dataset.index
     let text = event.currentTarget.dataset.text
-    console.log("activeBox",index,text);
+    console.log("activeBox", index, text);
     this.setData({
-      activeBoxIndex:index,
-      activeText:text
+      activeBoxIndex: index,
+      activeText: text
     })
   },
-  close:function(){
+
+  read: async function () {
+    if (this.data.isRead) return
     this.setData({
-      isShow:false
+      isRead: true
+    })
+    let audioSrc = this.data.audioSrc
+    let activeText = this.data.activeText
+    if (activeText !== this.data.cacheText) {
+      //违规文本检查
+      try {
+        await msgSecCheck(activeText)
+      } catch (error) {
+        console.log(error);
+        wx.showToast({
+          title: '文本含有违法违规内容!',
+          icon: 'none',
+          duration: 1500
+        })
+        return
+      }
+      wx.showLoading({
+        title: '加载中...',
+        mask:true
+      })
+      let audioData = await generatorAudio({
+        content: this.data.activeText
+      })
+      wx.hideLoading()
+      audioSrc = audioData.result.filePath
+      this.setData({
+        audioSrc: audioSrc,
+        cacheText: this.data.activeText
+      })
+    }
+    let innerAudioContext = wx.createInnerAudioContext()
+    innerAudioContext.src = audioSrc
+    innerAudioContext.play()
+    innerAudioContext.onPlay(res => {
+      console.log("开始播放");
+    })
+    innerAudioContext.onEnded(() => {
+      innerAudioContext.destroy()
+      this.setData({
+        isRead: false
+      })
+      console.log("结束播放");
     })
   },
   chooseImage: function () {
@@ -74,7 +141,7 @@ Page({
           imgH: imgHeight * zoomRatio,
           textDetections: [],
           newScale: 1,
-          isShow:true
+          isShow: true
         })
         await this._scanTextByFilePath(filePath)
       },
@@ -95,7 +162,16 @@ Page({
     wx.showLoading({
       title: '扫描中...',
     })
-    let ocrData = await orc(filePath)
+    let result = await ocr(filePath)
+    if (result.err){
+      wx.showToast({
+        title:result.err.msg,
+        icon:"none",
+        duration:2000
+      })
+      return
+    }
+    let ocrData = result.data
     console.log('ocrData', ocrData);
     let {
       zoomRatio
@@ -141,12 +217,11 @@ Page({
     })
   },
 
+
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad: function (options) {
-
-  },
+  onLoad: function (options) {},
 
   /**
    * 生命周期函数--监听页面初次渲染完成

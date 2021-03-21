@@ -23,7 +23,7 @@ const test = () => {
 }
 // 根据文本生成语音
 //参数请参考：https://mp.weixin.qq.com/wxopen/plugindevdoc?appid=wx3e17776051baf153&token=2035306076&lang=zh_CN
-const generatorAduio = ({
+const generatorAudio = ({
   content,
   speed,
   volume,
@@ -86,7 +86,7 @@ const msgSecCheck = (msg) => {
 module.exports = {
   formatTime: formatTime,
   splitText: splitText,
-  generatorAduio: generatorAduio,
+  generatorAudio: generatorAudio,
   msgSecCheck:msgSecCheck,
   test: test
 }
