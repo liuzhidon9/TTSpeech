@@ -163,7 +163,6 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: async function (options) {
-
     //获取本地缓存声音类型
     wx.getStorage({
       key: 'voiceType',

@@ -10,12 +10,12 @@ Page({
     audioArr: [],
     nodes: [],
     innerAudioContext: null,
-    isRead: true,
+    isRead: false,
     audioArr: {}
   },
   start:async function () {
     this.setData({
-      isRead:false
+      isRead:true
     })
     let audioArr = this.data.audioArr
     for (const source of audioArr) {

@@ -47,7 +47,8 @@ Page({
     cacheText: '',
     audioSrc: '',
     isShow: false,
-    isRead: false
+    isRead: false,
+    voiceType:1
   },
   //重置数据
   resetData: function () {
@@ -101,7 +102,8 @@ Page({
         mask:true
       })
       let audioData = await generatorAudio({
-        content: this.data.activeText
+        content: this.data.activeText,
+        voiceType:this.data.voiceType
       })
       wx.hideLoading()
       audioSrc = audioData.result.filePath
@@ -221,7 +223,18 @@ Page({
   /**
    * 生命周期函数--监听页面加载
    */
-  onLoad: function (options) {},
+  onLoad: function (options) {
+     //获取本地缓存声音类型
+     wx.getStorage({
+      key: 'voiceType',
+      success: (res) => {
+        // console.log(JSON.parse(res.data).selectVoice)
+        this.setData({
+          voiceType: JSON.parse(res.data).voiceType
+        })
+      },
+    })
+  },
 
   /**
    * 生命周期函数--监听页面初次渲染完成
