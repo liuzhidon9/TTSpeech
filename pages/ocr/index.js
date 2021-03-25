@@ -48,10 +48,11 @@ Page({
     audioSrc: '',
     isShow: false,
     isRead: false,
-    voiceType:1
+    voiceType: 1
   },
   //重置数据
   resetData: function () {
+    console.log("resetData", this.data.isShow);
     this.setData({
       imgFilePath: '',
       imgW: 0, //图片宽度
@@ -77,55 +78,7 @@ Page({
     })
   },
 
-  read: async function () {
-    if (this.data.isRead) return
-    this.setData({
-      isRead: true
-    })
-    let audioSrc = this.data.audioSrc
-    let activeText = this.data.activeText
-    if (activeText !== this.data.cacheText) {
-      //违规文本检查
-      try {
-        await msgSecCheck(activeText)
-      } catch (error) {
-        console.log(error);
-        wx.showToast({
-          title: '文本含有违法违规内容!',
-          icon: 'none',
-          duration: 1500
-        })
-        return
-      }
-      wx.showLoading({
-        title: '加载中...',
-        mask:true
-      })
-      let audioData = await generatorAudio({
-        content: this.data.activeText,
-        voiceType:this.data.voiceType
-      })
-      wx.hideLoading()
-      audioSrc = audioData.result.filePath
-      this.setData({
-        audioSrc: audioSrc,
-        cacheText: this.data.activeText
-      })
-    }
-    let innerAudioContext = wx.createInnerAudioContext()
-    innerAudioContext.src = audioSrc
-    innerAudioContext.play()
-    innerAudioContext.onPlay(res => {
-      console.log("开始播放");
-    })
-    innerAudioContext.onEnded(() => {
-      innerAudioContext.destroy()
-      this.setData({
-        isRead: false
-      })
-      console.log("结束播放");
-    })
-  },
+
   chooseImage: function () {
     wx.chooseImage({
       count: 1,
@@ -145,10 +98,115 @@ Page({
           newScale: 1,
           isShow: true
         })
-        await this._scanTextByFilePath(filePath)
+        //开始扫描图片
+        let ocrData = await this._scanTextByFilePath(filePath)
+        let textDetections = ocrData.TextDetections.map(item => {
+          return {
+            text: item.DetectedText,
+            width: item.ItemPolygon.Width * zoomRatio,
+            height: item.ItemPolygon.Height * zoomRatio,
+            top: item.Polygon[0].Y * zoomRatio,
+            left: item.Polygon[0].X * zoomRatio
+          }
+        })
+        this.setData({
+          textDetections: textDetections,
+          angel: ocrData.Angel
+        })
       },
       fail: (err) => {
         console.log(err);
+      }
+    })
+  },
+  read: async function () {
+    if (this.data.isRead) return
+    this.setData({
+      isRead: true
+    })
+    wx.showLoading({
+      title: '加载中...',
+      mask: true
+    })
+    let audioSrc = this.data.audioSrc
+    let activeText = this.data.activeText
+    if (activeText !== this.data.cacheText) {
+      //违规文本检查
+      try {
+        await msgSecCheck(activeText)
+      } catch (error) {
+        console.log(error);
+        wx.showToast({
+          title: '文本含有违法违规内容!',
+          icon: 'none',
+          duration: 1500
+        })
+        return
+      }
+      let audioData = await generatorAudio({
+        content: this.data.activeText,
+        voiceType: this.data.voiceType
+      })
+      audioSrc = audioData.result.filePath
+      this.setData({
+        audioSrc: audioSrc,
+        cacheText: this.data.activeText
+      })
+    }
+    wx.hideLoading()
+    let innerAudioContext = wx.createInnerAudioContext()
+    innerAudioContext.src = audioSrc
+    innerAudioContext.play()
+    innerAudioContext.onPlay(res => {
+      console.log("开始播放");
+    })
+    innerAudioContext.onEnded(() => {
+      innerAudioContext.destroy()
+      this.setData({
+        isRead: false
+      })
+      console.log("结束播放");
+    })
+  },
+  copyCurrent: function () {
+    wx.setClipboardData({
+      data: this.data.activeText,
+      success(res) {
+        wx.showToast({
+          title: '复制成功',
+          icon: "success",
+          duration: 1500
+        })
+      }
+    })
+  },
+  copyAll: function () {
+    let prevItem = null
+    let content = ''
+    console.log('content', content);
+    for (const item of this.data.textDetections) {
+      if (!prevItem) {
+        content = item.left <= 10 ? content + item.text : " " + content + item.text
+        prevItem = item
+        continue
+      }
+
+      if ((item.top - prevItem.top) < prevItem.height / 2) {
+        content += " " + item.text
+      } else if ((item.top - prevItem.top) > prevItem.height / 2) {
+        content = item.left <= 10 ? content + "\n\n" + item.text : content + "\n\n  " + item.text
+      }
+      prevItem = item
+    }
+    console.log('content', content);
+    wx.setClipboardData({
+      data: content,
+      success(res) {
+        wx.showToast({
+          title: '复制成功',
+          icon: "success",
+          duration: 1500
+        })
       }
     })
   },
@@ -165,33 +223,18 @@ Page({
       title: '扫描中...',
     })
     let result = await ocr(filePath)
-    if (result.err){
+    if (result.err) {
       wx.showToast({
-        title:result.err.msg,
-        icon:"none",
-        duration:2000
+        title: result.err.msg,
+        icon: "none",
+        duration: 2000
       })
       return
     }
     let ocrData = result.data
     console.log('ocrData', ocrData);
-    let {
-      zoomRatio
-    } = await this._getImageInfoByFilePath(filePath)
-    let textDetections = ocrData.TextDetections.map(item => {
-      return {
-        text: item.DetectedText,
-        width: item.ItemPolygon.Width * zoomRatio,
-        height: item.ItemPolygon.Height * zoomRatio,
-        top: item.Polygon[0].Y * zoomRatio,
-        left: item.Polygon[0].X * zoomRatio
-      }
-    })
-    this.setData({
-      textDetections: textDetections,
-      angel: ocrData.Angel
-    })
     wx.hideLoading()
+    return ocrData
   },
 
   //获取图片信息
@@ -224,8 +267,15 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad: function (options) {
-     //获取本地缓存声音类型
-     wx.getStorage({
+    if (!wx.canIUse('page-container')) {
+      wx.showModal({
+        title: '提示',
+        content: '当前微信版本过低，无法使用该功能，请升级到最新微信版本后重试。'
+      })
+      return
+    }
+    //获取本地缓存声音类型
+    wx.getStorage({
       key: 'voiceType',
       success: (res) => {
         // console.log(JSON.parse(res.data).selectVoice)

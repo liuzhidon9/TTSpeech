@@ -7,17 +7,21 @@ view#app {
   align-items: center;
 
 }
-view#app image.chooseImage{
+
+view#app image.chooseImage {
   width: 120px;
-  height:80px;
+  height: 80px;
   box-shadow: 0 0 300px skyblue;
   background-color: #fff;
   border-radius: 3px;
 }
+
 view#app page-container .container {
   width: 100vw;
   height: 100vh;
   position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
 view#app page-container .container icon.cancel {
@@ -27,46 +31,80 @@ view#app page-container .container icon.cancel {
   z-index: 1;
 }
 
-view#app view.ocr-container {
-  width: 100vw;
-  height: 85vh;
+view#app page-container .container .ocr-container {
   overflow: scroll;
   font-size: 0;
+  flex:1;
 }
 
-view#app page-container .container .read-box {
+view#app page-container .container .read-container {
   width: 100vw;
-  height: 15vh;
-  position: absolute;
-  bottom: 0;
-  left: 0;
+  height: 120px;
   box-shadow: 0 0 5px rgb(211, 211, 211);
+  display: flex;
+  flex-direction: column;
+}
+view#app page-container .container .read-container .copy{
+  width: 100%;
+  height: 36px;
+  display: flex;
+}
+view#app page-container .container .read-container .copy button{
+  height: 100%;
+  flex:1;
+  padding:0;
+  background-color:rgb(255, 255, 255);
+  border: 1px solid #eee;
+  border-radius:0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  font-weight: 600;
+  font-size: 16px;
+  color:#1296db;
+}
+view#app page-container .container .read-container .copy button.hover{
+  background-color:rgba(144, 238, 144, 0.5);
+}
+view#app page-container .container .read-container .copy button image{
+  width: 20px;
+  height: 20px;
+}
+view#app page-container .container .read-box {
+  width: 100%;
+  flex:1;
   z-index: 1;
   display: flex;
   justify-content: space-between;
 }
-view#app page-container .container .read-box text{
-  flex:1;
-  padding: 5px;
+
+view#app page-container .container .read-box text {
+  flex: 1;
+  height: 84px;
   padding-left: 10px;
+  overflow: scroll;
 }
-view#app page-container .container .read-box button.read{
+
+view#app page-container .container .read-box button.read {
   width: 60px;
   height: 100%;
-  background:#fff;
+  background: #fff;
   padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-view#app page-container .container .read-box button.read-hover{
+
+view#app page-container .container .read-box button.read-hover {
   background-color: #eee;
 }
-view#app page-container .container .read-box button image{
-  width: 50px;
-  height: 50px;
-  background-color:transparent;
+
+view#app page-container .container .read-box button image {
+  width: 40px;
+  height: 40px;
+  background-color: transparent;
 }
+
 view#app view.ocr-container .image-wrap {
   position: relative;
   display: flex;
@@ -79,7 +117,7 @@ view#app view.ocr-container .image-wrap .text-box {
   z-index: 10;
   border: 1px solid lightcoral;
   border-radius: 1px;
- 
+
 }
 
 view#app view.ocr-container .image-wrap .text-box.active {

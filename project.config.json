@@ -41,7 +41,7 @@
     "minifyWXSS": true
   },
   "compileType": "miniprogram",
-  "libVersion": "2.15.0",
+  "libVersion": "2.16.0",
   "appid": "wxe58c0c5af735b2d2",
   "projectname": "TTS",
   "debugOptions": {
